@@ -4,7 +4,7 @@
 
 # WindowsGSM.ATM10 — MeFriendos build
 
-[![WindowsGSM](https://img.shields.io/badge/WindowsGSM-%E2%89%A51.21-38CDD4)](https://github.com/WindowsGSM/WindowsGSM)
+[![WindowsGSM Raziel v1.25.1.22](https://img.shields.io/badge/WindowsGSM-Raziel%20v1.25.1.22-38CDD4)](https://github.com/Raziel7893/WindowsGSM/releases/tag/v1.25.1.22)
 [![Version](https://img.shields.io/badge/version-0.1.8-7AC943)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
