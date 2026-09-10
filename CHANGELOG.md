@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.8 — 2026-09-10
+
+- Replaced the PowerShell `NetSecurity` firewall cleanup with the Windows Firewall COM API used by WindowsGSM itself.
+- Removes WindowsGSM's automatic program exception for the exact `startserver.bat` path before Java starts.
+- Verifies that the automatic exception is gone before allowing the server to launch.
+- Keeps manually configured port rules unchanged.
+- Avoids startup failures caused by unavailable or unreliable `Get-NetFirewall*` cmdlets.
+
 ## 0.1.7 — 2026-09-09
 
 - Uses the PapaGordon GitHub repository as the plugin project URL.
