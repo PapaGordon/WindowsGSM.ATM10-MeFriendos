@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -19,7 +21,7 @@ namespace WindowsGSM.Plugins
             name = "WindowsGSM.ATM10",
             author = "MeFriendos",
             description = "WindowsGSM plugin for Minecraft: All the Mods 10 (ATM10 / NeoForge)",
-            version = "0.1.7",
+            version = "0.1.8",
             url = "https://github.com/PapaGordon/WindowsGSM.ATM10-MeFriendos",
             color = "#7AC943"
         };
@@ -145,37 +147,61 @@ namespace WindowsGSM.Plugins
 
         private bool RemoveAutomaticBroadFirewallRule()
         {
-            string startPath = ServerPath.GetServersServerFiles(_serverData.ServerID, StartPath);
-            string escapedPath = startPath.Replace("'", "''");
-            string command =
-                "$path = '" + escapedPath + "'; " +
-                "$rules = Get-NetFirewallApplicationFilter -Program $path -PolicyStore ActiveStore -ErrorAction Stop | " +
-                "Get-NetFirewallRule -ErrorAction Stop | " +
-                "Where-Object { $rule = $_; $port = $rule | Get-NetFirewallPortFilter -ErrorAction Stop; " +
-                "$address = $rule | Get-NetFirewallAddressFilter -ErrorAction Stop; " +
-                "$rule.Direction -eq 'Inbound' -and $rule.Action -eq 'Allow' -and " +
-                "$port.LocalPort -eq 'Any' -and $address.LocalAddress -eq 'Any' -and $address.RemoteAddress -eq 'Any' }; " +
-                "if ($rules) { $rules | Remove-NetFirewallRule -Confirm:$false -ErrorAction Stop }";
-            string encodedCommand = Convert.ToBase64String(Encoding.Unicode.GetBytes(command));
+            string programPath = ServerPath.GetServersServerFiles(_serverData.ServerID, StartPath);
 
             try
             {
-                using (var firewallCleanup = new Process())
+                Type managerType = Type.GetTypeFromProgID("HNetCfg.FwMgr");
+                if (managerType == null)
+                    return false;
+
+                object manager = Activator.CreateInstance(managerType);
+                object localPolicy = manager.GetType().InvokeMember(
+                    "LocalPolicy", BindingFlags.GetProperty, null, manager, null);
+                object currentProfile = localPolicy.GetType().InvokeMember(
+                    "CurrentProfile", BindingFlags.GetProperty, null, localPolicy, null);
+                object applications = currentProfile.GetType().InvokeMember(
+                    "AuthorizedApplications", BindingFlags.GetProperty, null, currentProfile, null);
+
+                IEnumerable entries = applications as IEnumerable;
+                if (entries == null)
+                    return false;
+
+                bool found = false;
+                foreach (object application in entries)
                 {
-                    firewallCleanup.StartInfo.FileName = "powershell.exe";
-                    firewallCleanup.StartInfo.Arguments = "-NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand " + encodedCommand;
-                    firewallCleanup.StartInfo.CreateNoWindow = true;
-                    firewallCleanup.StartInfo.UseShellExecute = false;
-                    firewallCleanup.Start();
+                    string applicationPath = Convert.ToString(application.GetType().InvokeMember(
+                        "ProcessImageFileName", BindingFlags.GetProperty, null, application, null));
 
-                    if (!firewallCleanup.WaitForExit(10000))
+                    if (string.Equals(applicationPath, programPath, StringComparison.OrdinalIgnoreCase))
                     {
-                        firewallCleanup.Kill();
-                        return false;
+                        found = true;
+                        break;
                     }
-
-                    return firewallCleanup.ExitCode == 0;
                 }
+
+                if (!found)
+                    return true;
+
+                applications.GetType().InvokeMember(
+                    "Remove", BindingFlags.InvokeMethod, null, applications, new object[] { programPath });
+
+                applications = currentProfile.GetType().InvokeMember(
+                    "AuthorizedApplications", BindingFlags.GetProperty, null, currentProfile, null);
+                entries = applications as IEnumerable;
+                if (entries == null)
+                    return false;
+
+                foreach (object application in entries)
+                {
+                    string applicationPath = Convert.ToString(application.GetType().InvokeMember(
+                        "ProcessImageFileName", BindingFlags.GetProperty, null, application, null));
+
+                    if (string.Equals(applicationPath, programPath, StringComparison.OrdinalIgnoreCase))
+                        return false;
+                }
+
+                return true;
             }
             catch
             {
