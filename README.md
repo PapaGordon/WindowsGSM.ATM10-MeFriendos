@@ -5,7 +5,7 @@
 # WindowsGSM.ATM10 — MeFriendos build
 
 [![WindowsGSM](https://img.shields.io/badge/WindowsGSM-%E2%89%A51.21-38CDD4)](https://github.com/WindowsGSM/WindowsGSM)
-[![Version](https://img.shields.io/badge/version-0.1.7-7AC943)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.1.8-7AC943)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 WindowsGSM plugin for Minecraft: All the Mods 10 on NeoForge and Minecraft 1.21.1.
@@ -21,7 +21,7 @@ The plugin installs a locally supplied official ATM10 server pack, manages the N
 - Writes the WindowsGSM server port, query port and player limit to `server.properties`.
 - Preserves worlds, player lists, EULA, server properties and custom `-Xms`/`-Xmx` values during updates.
 - Skips a reinstall when the selected server pack is already installed.
-- Removes WindowsGSM's broad automatic firewall rule for this server before Java starts.
+- Removes WindowsGSM's automatic firewall application exception for this server before Java starts.
 
 ## Requirements
 
@@ -38,10 +38,7 @@ ATM10, NeoForge, Minecraft and the server pack are not distributed with this plu
 2. Extract the folder `ATM10.cs` into the WindowsGSM `plugins` folder.
 3. Click **Reload Plugins** or restart WindowsGSM.
 4. Download the matching ATM10 server pack from CurseForge.
-5. Place `ServerFiles-<version>.zip` in one of these locations:
-   - the WindowsGSM root folder;
-   - the `plugins\ATM10.cs` folder;
-   - the target server's `serverfiles` folder.
+5. Place `ServerFiles-<version>.zip` in the WindowsGSM root folder, `plugins\ATM10.cs`, or the target server's `serverfiles` folder.
 6. Install **Minecraft: All the Mods 10 (ATM10)** in WindowsGSM and accept the Minecraft EULA prompt.
 7. Configure memory in `user_jvm_args.txt`, for example `-Xms8G` and `-Xmx12G`.
 
@@ -56,13 +53,11 @@ The plugin replaces modpack-managed files while preserving server-owned data and
 
 ## Security: automatic port opening is disabled
 
-This MeFriendos build does **not** open game or query ports automatically.
+WindowsGSM may create an automatic application exception for `startserver.bat` before launching the plugin. This build removes that exact program exception before Java starts.
 
-WindowsGSM may create a broad inbound application rule for `startserver.bat` before launching the plugin. This build removes only broad inbound **Allow** rules on any network profile for that exact path when every local port and every local and remote address are allowed. Port-specific or address-restricted manual rules are preserved.
+The cleanup uses the same Windows Firewall COM API family (`HNetCfg.FwMgr`) used by WindowsGSM for its own application exceptions and does not depend on PowerShell `NetSecurity` cmdlets.
 
-If Windows cannot verify or remove the broad rule, the plugin stops the launch and reports an error instead of starting with an unknown firewall state. Starting WindowsGSM as administrator is therefore required.
-
-This is intentional: a narrow rule for a known port, protocol, network profile and remote scope is safer than allowing the complete start program through the Public firewall profile.
+Manual firewall rules are not created or removed. Rules for other server paths are not selected because the exact program path must match. After removal, the plugin checks the authorized-application list again and stops startup if the exception is still present or the firewall state cannot be verified.
 
 Create only the Minecraft game and query rules required by your setup. Keep administrative services restricted to a Private VPN or trusted subnet.
 
@@ -87,9 +82,9 @@ Run **Install** or **Update** again and inspect the WindowsGSM console for error
 - Install and Update finish without a stuck WindowsGSM progress state.
 - Existing `-Xms` and `-Xmx` values remain unchanged after Install/Update.
 - The embedded console receives server output and the **Stop** action shuts down cleanly.
-- No unrestricted inbound rule remains for this server's `startserver.bat` after startup.
-- A forced firewall-cleanup failure prevents the Java process from starting.
-- The server is reachable only through manually configured ports.
+- No automatic application exception remains for this server's `startserver.bat` after startup.
+- Manually configured port rules remain present.
+- A firewall-cleanup failure prevents the server process from starting.
 
 ## Project links
 
