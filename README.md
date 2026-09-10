@@ -2,11 +2,17 @@
   <img src="ATM10.cs/ATM10.png" alt="All the Mods 10" width="128">
 </p>
 
-# WindowsGSM.ATM10 — MeFriendos build
+<h1 align="center">WindowsGSM.ATM10</h1>
 
-[![WindowsGSM Raziel v1.25.1.22](https://img.shields.io/badge/WindowsGSM-Raziel%20v1.25.1.22-38CDD4)](https://github.com/Raziel7893/WindowsGSM/releases/tag/v1.25.1.22)
-[![Version](https://img.shields.io/badge/version-0.1.8-7AC943)](CHANGELOG.md)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+<p align="center">
+  MeFriendos build for running Minecraft: All the Mods 10 with WindowsGSM.
+</p>
+
+<p align="center">
+  <a href="https://github.com/Raziel7893/WindowsGSM/releases/tag/v1.25.1.22"><img src="https://img.shields.io/badge/WindowsGSM-Raziel%20v1.25.1.22-38CDD4" alt="Raziel WindowsGSM v1.25.1.22"></a>
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-0.1.8-7AC943" alt="Version 0.1.8"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
+</p>
 
 WindowsGSM plugin for Minecraft: All the Mods 10 on NeoForge and Minecraft 1.21.1.
 
